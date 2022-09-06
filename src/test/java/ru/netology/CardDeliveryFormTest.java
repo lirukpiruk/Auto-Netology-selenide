@@ -20,7 +20,7 @@ public class CardDeliveryFormTest {
     @BeforeEach
     void Setup() {
         open("http://localhost:9999/");
-        //Configuration.headless = true;
+        Configuration.headless = true;
     }
 
     public String setCurrentDate(int days) {
