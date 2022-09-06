@@ -9,10 +9,10 @@ import org.openqa.selenium.Keys;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 
 import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Selenide.*;
 
 
 public class CardDeliveryFormTest {
@@ -107,5 +107,54 @@ public class CardDeliveryFormTest {
         $(".button").click();
         $("label.input_invalid").shouldBe(exist);
     }
+
+    @Test
+    void shouldSubmitValidDataWithCityListAndCalendar() {
+        Configuration.holdBrowserOpen = true;
+        int daysToAdd = 7;
+        String meetingDate = setCurrentDate(daysToAdd);
+        $("[data-test-id=city] input").setValue("ма");
+        $x("//*[text()='Ханты-Мансийск']").click();
+        $(".icon_name_calendar").click();
+        int meetingDateMonth = LocalDate.now().plusDays(daysToAdd).getMonthValue();
+        int defaultDateMonth = LocalDate.now().plusDays(3).getMonthValue();
+        String meetingDateDay = Integer.toString(LocalDate.now().plusDays(daysToAdd).getDayOfMonth());
+        if (meetingDateMonth == defaultDateMonth) {
+            $$(".calendar__day").find(exactText(meetingDateDay)).click();
+        } else {
+            $("[data-step='1']").click();
+            $$(".calendar__day").find(exactText(meetingDateDay)).click();
+        }
+        $("[data-test-id=name] input").setValue("Иванов Иван");
+        $("[data-test-id=phone] input").setValue("+79112223344");
+        $("[data-test-id=agreement]").click();
+        $(".button").click();
+        $(".notification__content").shouldBe(visible, Duration.ofSeconds(15)).shouldHave(exactText("Встреча успешно забронирована на " + meetingDate));
+    }
+
+    @Test
+    void shouldSubmitValidDataIfMeetingLastMonth() {
+        Configuration.holdBrowserOpen = true;
+        int daysToAdd = 25;
+        String meetingDate = setCurrentDate(daysToAdd);
+        $("[data-test-id=city] input").setValue("ма");
+        $x("//*[text()='Ханты-Мансийск']").click();
+        $(".icon_name_calendar").click();
+        int meetingDateMonth = LocalDate.now().plusDays(daysToAdd).getMonthValue();
+        int defaultDateMonth = LocalDate.now().plusDays(3).getMonthValue();
+        String meetingDateDay = Integer.toString(LocalDate.now().plusDays(daysToAdd).getDayOfMonth());
+        if (meetingDateMonth == defaultDateMonth) {
+            $$(".calendar__day").find(exactText(meetingDateDay)).click();
+        } else {
+            $("[data-step='1']").click();
+            $$(".calendar__day").find(exactText(meetingDateDay)).click();
+        }
+        $("[data-test-id=name] input").setValue("Иванов Иван");
+        $("[data-test-id=phone] input").setValue("+79112223344");
+        $("[data-test-id=agreement]").click();
+        $(".button").click();
+        $(".notification__content").shouldBe(visible, Duration.ofSeconds(15)).shouldHave(exactText("Встреча успешно забронирована на " + meetingDate));
+    }
+
 
 }
